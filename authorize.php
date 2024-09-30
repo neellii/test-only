@@ -53,6 +53,7 @@ if(!password_verify($data['password'], $user['password'])) {
 // при отсутствии ошибок записываем в сессию данные пользователя
 if(empty($errors)) {
   $_SESSION['user'] = [
+    'id' => $user['id'],
     'name' => $user['name'],
     'telephone' => $user['telephone'],
     'email' => $user['email']

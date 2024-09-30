@@ -18,8 +18,9 @@ require_once 'funcs.php' ?>
     <?php if(!checkAuth()): ?>
     <li><a href="index.php">Регистрация</a></li>
     <li><a href="login.php">Войти</a></li>
+    <li><a href="dashboard.php">Профиль</a></li>
     <?php else: ?>
-    <li><a href="#"><?= $_SESSION['user']['name'] ?></a></li>
+    <li><a href="dashboard.php"><?= $_SESSION['user']['name'] ?></a></li>
     <li><a href="logout.php">Выйти</a></li>
     <?php endif; ?>
   </ul>

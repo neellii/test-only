@@ -37,16 +37,18 @@ foreach($checkUnique as $field) {
 
 // если введено значение password, то проверка и валидация нового password
 $passwordFields = ['password', 'old_password', 'password_confirm'];
-if(!empty($data['password'])) {
+if(!empty($data['password']) || !empty($data['old_password']) || !empty($data['password_confirm'])) {
   foreach($passwordFields as $field) {
     if (empty($field)) {
       $errors['passwordEmpty'] = errorDiv($errorMessages['passwordEmpty']);
     }
   }
 
-  if(!$conn->rowExists('password', 'users', $data['old_password'])) {
+  $hashPassword = $conn->rowExists('id', 'users', $_SESSION['user']['id'])['password'];
+
+  if(!password_verify($data['old_password'], $hashPassword)) {
     $errors['incorrectPassword'] = errorDiv($errorMessages['incorrectPassword']);
-  };
+  }
   
   if($data['password'] !== $data['password_confirm']) {
     $errors['password'] = errorDiv($errorMessages['password']);
@@ -65,17 +67,16 @@ if($_SESSION['user']['email'] !== $data['email'] && !filter_var($data['email'], 
 // при отсутствии ошибок обновление записи в БД и в массиве $_SESSION
 if(empty($errors)) {
   if(!empty($data['password'])) {
-    $conn->query("INSERT INTO users (name, telephone, email, password) VALUES (?, ?, ?, ?)", [$data['name'], $data['telephone'], $data['email'], password_hash($data['password'], PASSWORD_DEFAULT)]);
+    $conn->query("UPDATE users SET name = ?, telephone = ?, email = ?, password = ? WHERE id = ?", [$data['name'], $data['telephone'], $data['email'], password_hash($data['password'], PASSWORD_DEFAULT), $_SESSION['user']['id']]);
   } else {
-    $conn->query("INSERT INTO users (name, telephone, email) VALUES (?, ?, ?)", [$data['name'], $data['telephone'], $data['email']]);
+    $conn->query("UPDATE users SET name = ?, telephone = ?, email = ? WHERE id = ?", [$data['name'], $data['telephone'], $data['email'], $_SESSION['user']['id']]);
   }
   
   $_SESSION['alert'] = 'Данные успешно изменены';
-  $_SESSION['user'] = [
-    'name' => $data['name'],
-    'telephone' => $data['telephone'],
-    'email' => $data['email']
-  ];
+  $_SESSION['user']['name'] = $data['name'];
+  $_SESSION['user']['telephone'] = $data['telephone'];
+  $_SESSION['user']['email'] = $data['email'];
+
   header('Location: /dashboard.php');
   die();
 }
